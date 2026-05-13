@@ -11,491 +11,200 @@
     --gold-dark: #633806;
     --red-light: #FCEBEB;
     --red: #A32D2D;
-    --green-light: #E1F5EE;
-    --green: #0F6E56;
-    --gray-bg: #F5F5F3;
-    --gray-mid: #888780;
-    --text: #1a1a1a;
-    --text-muted: #666;
     --border: rgba(0,0,0,0.1);
     --white: #ffffff;
+    --gray-bg: #f5f5f3;
     --radius: 14px;
     --radius-sm: 8px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     background: #0f1923;
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── SIGNAGE VIEW (default, fullscreen) ── */
-  #signage-view {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    padding: 0;
-  }
-
-  .signage-header {
-    background: #0f1923;
-    padding: 22px 36px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .signage-title {
-    font-size: 28px;
-    font-weight: 700;
     color: #fff;
-    letter-spacing: -0.5px;
+    min-height: 100vh;
   }
 
-  .signage-title span {
-    color: var(--gold);
-  }
+  #signage-view { display: flex; flex-direction: column; min-height: 100vh; }
 
-  .signage-meta {
-    font-size: 14px;
-    color: rgba(255,255,255,0.45);
+  .s-header {
+    background: #0a1118;
+    padding: 18px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
   }
+  .s-title { font-size: 26px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+  .s-title span { color: var(--gold); }
+  .s-stats { display: flex; gap: 28px; }
+  .s-stat-val { font-size: 20px; font-weight: 700; color: #fff; text-align: right; }
+  .s-stat-lbl { font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.6px; text-align: right; }
 
-  .signage-stats {
-    display: flex;
-    gap: 24px;
-  }
+  .s-body { flex: 1; padding: 20px 24px; background: #141e2b; }
 
-  .signage-stat {
-    text-align: right;
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .fbtn {
+    padding: 6px 16px; border-radius: 999px; font-size: 12px;
+    border: 1px solid rgba(255,255,255,0.15); background: transparent;
+    color: rgba(255,255,255,0.55); cursor: pointer;
   }
-
-  .signage-stat-val {
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-  }
-
-  .signage-stat-lbl {
-    font-size: 11px;
-    color: rgba(255,255,255,0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .signage-body {
-    flex: 1;
-    padding: 24px 28px;
-    background: #141e2b;
-  }
+  .fbtn.active { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.3); }
 
   .tiles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
   }
 
   .tile {
-    background: #1c2b3a;
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.07);
-    transition: opacity 0.4s;
+    background: #1c2b3a; border-radius: var(--radius); overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07); transition: opacity 0.4s;
   }
+  .tile.out { opacity: 0.28; }
+  .tile.winner-tile { border: 2px solid var(--gold); }
 
-  .tile.out {
-    opacity: 0.28;
+  .tile-flag-wrap { position: relative; height: 115px; overflow: hidden; background: #111; }
+  .tile-flag-img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: brightness(0.72);
   }
+  .tile.winner-tile .tile-flag-img { filter: brightness(0.88); }
+  .tile.out .tile-flag-img { filter: brightness(0.28) grayscale(0.9); }
 
-  .tile.winner-tile {
-    border: 2px solid var(--gold);
-    background: #221a0a;
+  .tile-flag-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 24px 10px 8px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    font-size: 14px; font-weight: 700; color: #fff; text-align: center;
   }
+  .tile-flag-label.struck { text-decoration: line-through; color: rgba(255,255,255,0.3); }
+  .tile-flag-label.gold { color: var(--gold); }
 
-  .tile-top {
-    padding: 16px 12px 10px;
-    text-align: center;
-    background: rgba(255,255,255,0.03);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+  .winner-crown {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--gold); color: var(--gold-dark);
+    font-size: 10px; font-weight: 700; border-radius: 999px; padding: 3px 8px;
   }
-
-  .tile-top.winner-top {
-    background: rgba(239,159,39,0.12);
-  }
-
-  .tile-flag {
-    font-size: 3rem;
-    line-height: 1;
-    display: block;
-    margin-bottom: 6px;
-  }
-
-  .tile-teamname {
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .tile-teamname.struck {
-    text-decoration: line-through;
-    color: rgba(255,255,255,0.3);
-  }
-
-  .tile-teamname.gold {
-    color: var(--gold);
+  .out-stamp {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%) rotate(-12deg);
+    border: 3px solid rgba(200,50,50,0.85); color: rgba(200,50,50,0.85);
+    font-size: 13px; font-weight: 800; padding: 3px 10px;
+    border-radius: 4px; letter-spacing: 1px; pointer-events: none;
   }
 
   .tile-employees {
-    padding: 10px 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-  }
-
-  .emp-row {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-  }
-
-  .emp-photo {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 2px solid rgba(255,255,255,0.1);
-  }
-
-  .emp-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
-    border: 2px solid rgba(255,255,255,0.08);
-  }
-
-  .emp-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.85);
-    line-height: 1.3;
-  }
-
-  .emp-name.struck {
-    text-decoration: line-through;
-    color: rgba(255,255,255,0.25);
-  }
-
-  .emp-badge {
-    font-size: 10px;
-    border-radius: 999px;
-    padding: 1px 7px;
-    display: inline-block;
-    margin-top: 1px;
-  }
-
-  .emp-badge.out {
-    background: rgba(163,45,45,0.3);
-    color: #f09595;
-  }
-
-  .emp-badge.win {
-    background: rgba(239,159,39,0.25);
-    color: var(--gold);
-  }
-
-  .tile-empty {
-    font-size: 12px;
-    color: rgba(255,255,255,0.2);
-    text-align: center;
-    padding: 6px 0;
-  }
-
-  /* ── TICKER BAR ── */
-  .ticker-bar {
-    background: #0a1118;
-    padding: 9px 0;
+    padding: 10px 10px 12px; display: flex; flex-direction: column; gap: 7px;
     border-top: 1px solid rgba(255,255,255,0.06);
-    overflow: hidden;
-    white-space: nowrap;
   }
+  .emp-row { display: flex; align-items: center; gap: 8px; }
+  .emp-photo {
+    width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+    flex-shrink: 0; border: 2px solid rgba(255,255,255,0.12);
+  }
+  .emp-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; border: 2px solid rgba(255,255,255,0.08);
+  }
+  .emp-name { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.85); }
+  .emp-name.struck { text-decoration: line-through; color: rgba(255,255,255,0.25); }
+  .emp-badge { font-size: 10px; border-radius: 999px; padding: 1px 7px; display: inline-block; margin-top: 1px; }
+  .emp-badge.win { background: rgba(239,159,39,0.25); color: var(--gold); }
+  .emp-badge.out { background: rgba(163,45,45,0.25); color: #f09595; }
+  .tile-empty { font-size: 12px; color: rgba(255,255,255,0.18); text-align: center; padding: 6px 0; }
 
+  .ticker-bar {
+    background: #0a1118; padding: 8px 0;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    overflow: hidden; white-space: nowrap; flex-shrink: 0;
+  }
   .ticker-inner {
-    display: inline-block;
-    animation: ticker 30s linear infinite;
-    font-size: 13px;
-    color: rgba(255,255,255,0.35);
+    display: inline-block; animation: ticker 40s linear infinite;
+    font-size: 12px; color: rgba(255,255,255,0.35);
   }
+  .ticker-inner b { color: rgba(255,255,255,0.65); font-weight: 500; }
+  @keyframes ticker { 0%{transform:translateX(100vw)} 100%{transform:translateX(-100%)} }
 
-  .ticker-inner b {
-    color: rgba(255,255,255,0.7);
-    font-weight: 500;
-  }
-
-  @keyframes ticker {
-    0% { transform: translateX(100vw); }
-    100% { transform: translateX(-100%); }
-  }
-
-  /* ── ADMIN VIEW ── */
-  #admin-view {
-    display: none;
-    background: #f5f5f3;
-    min-height: 100vh;
-    padding: 24px;
-  }
-
-  .admin-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .admin-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .a-card {
-    background: var(--white);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 16px 18px;
-    margin-bottom: 14px;
-  }
-
-  .a-card-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 12px;
-  }
-
-  .a-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  input, select {
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 11px;
-    font-size: 13px;
-    background: var(--white);
-    color: var(--text);
-    flex: 1;
-    min-width: 120px;
-  }
-
+  #admin-view { display: none; background: var(--gray-bg); min-height: 100vh; padding: 24px; color: #1a1a1a; }
+  .a-title { font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 18px; }
+  .a-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px 18px; margin-bottom: 14px; }
+  .a-card-title { font-size: 12px; font-weight: 600; color: #666; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .a-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input, select { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 11px; font-size: 13px; background: var(--white); color: #1a1a1a; flex: 1; min-width: 120px; }
   input:focus, select:focus { outline: none; border-color: #888; }
-
-  .btn {
-    padding: 8px 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--white);
-    color: var(--text);
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
+  .btn { padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--white); color: #1a1a1a; font-size: 13px; cursor: pointer; white-space: nowrap; }
   .btn:hover { background: var(--gray-bg); }
-  .btn:active { transform: scale(0.98); }
   .btn.primary { background: #0f1923; color: #fff; border-color: #0f1923; }
-  .btn.primary:hover { background: #1c2b3a; }
   .btn.gold { background: var(--gold-light); color: var(--gold-dark); border-color: var(--gold); font-weight: 600; }
   .btn.danger { color: var(--red); border-color: #f7c1c1; }
   .btn.danger:hover { background: var(--red-light); }
 
-  .team-toggle {
-    padding: 5px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    border: 1px solid var(--border);
-    background: var(--white);
-    cursor: pointer;
-    color: var(--text);
-  }
+  .team-toggle { padding: 5px 12px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); background: var(--white); cursor: pointer; color: #1a1a1a; display: inline-flex; align-items: center; gap: 6px; }
+  .team-toggle img { width: 24px; height: 16px; object-fit: cover; border-radius: 2px; }
+  .team-toggle.out { background: var(--red-light); border-color: #f7c1c1; color: var(--red); }
 
-  .team-toggle.out {
-    background: var(--red-light);
-    border-color: #f7c1c1;
-    color: var(--red);
-  }
+  .entries-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
+  .entry-row { display: flex; align-items: center; gap: 10px; padding: 7px 10px; background: var(--gray-bg); border-radius: var(--radius-sm); font-size: 13px; }
+  .entry-avatar-sm { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; border: 1px solid var(--border); flex-shrink: 0; }
+  .del-btn { margin-left: auto; padding: 3px 8px; border: none; background: none; color: var(--red); cursor: pointer; font-size: 18px; line-height: 1; }
+  .photo-preview-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); display: none; }
 
-  .entries-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 280px;
-    overflow-y: auto;
-  }
-
-  .entry-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 10px;
-    background: var(--gray-bg);
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-  }
-
-  .entry-row img {
-    width: 32px; height: 32px;
-    border-radius: 50%; object-fit: cover;
-    border: 1px solid var(--border);
-  }
-
-  .entry-avatar-sm {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 600;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-
-  .del-btn {
-    margin-left: auto;
-    padding: 3px 8px;
-    border: none;
-    background: none;
-    color: var(--red);
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-  }
-
-  .filter-bar {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-
-  .filter-btn {
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    border: 1px solid var(--border);
-    background: var(--white);
-    cursor: pointer;
-    color: var(--text);
-  }
-
-  .filter-btn.active {
-    background: #0f1923;
-    color: #fff;
-    border-color: #0f1923;
-  }
-
-  /* ── TOGGLE BUTTON ── */
   #toggle-btn {
-    position: fixed;
-    bottom: 18px;
-    right: 18px;
-    z-index: 999;
-    padding: 10px 18px;
-    background: rgba(255,255,255,0.12);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 999px;
-    font-size: 13px;
-    cursor: pointer;
-    backdrop-filter: blur(6px);
+    position: fixed; bottom: 18px; right: 18px; z-index: 999;
+    padding: 10px 20px; background: rgba(255,255,255,0.1);
+    color: #fff; border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px; font-size: 13px; cursor: pointer;
   }
-
-  #toggle-btn.admin-mode {
-    background: #0f1923;
-    border-color: #0f1923;
-  }
-
-  .photo-preview {
-    width: 40px; height: 40px;
-    border-radius: 50%; object-fit: cover;
-    border: 1px solid var(--border);
-    display: none;
-  }
+  #toggle-btn.admin-mode { background: #0f1923; border-color: #0f1923; color: #fff; }
 </style>
 </head>
 <body>
 
-<!-- SIGNAGE VIEW -->
 <div id="signage-view">
-  <div class="signage-header">
+  <div class="s-header">
     <div>
-      <div class="signage-title">WM Tippspiel <span>2026</span></div>
-      <div class="signage-meta" id="s-meta">Wer tippt den richtigen Weltmeister?</div>
+      <div class="s-title">WM Tippspiel <span>2026</span></div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:2px" id="s-meta">Wer tippt den richtigen Weltmeister?</div>
     </div>
-    <div class="signage-stats" id="s-stats"></div>
+    <div class="s-stats" id="s-stats"></div>
   </div>
-  <div class="signage-body">
-    <div class="filter-bar" id="s-filter">
-      <button class="filter-btn active" onclick="setFilter('all',this)">Alle Teams</button>
-      <button class="filter-btn" onclick="setFilter('active',this)">Im Rennen</button>
-      <button class="filter-btn" onclick="setFilter('out',this)">Ausgeschieden</button>
+  <div class="s-body">
+    <div class="filter-bar">
+      <button class="fbtn active" onclick="setFilter('all',this)">Alle Teams</button>
+      <button class="fbtn" onclick="setFilter('active',this)">Im Rennen</button>
+      <button class="fbtn" onclick="setFilter('out',this)">Ausgeschieden</button>
     </div>
     <div class="tiles-grid" id="tiles-grid"></div>
   </div>
   <div class="ticker-bar"><div class="ticker-inner" id="ticker"></div></div>
 </div>
 
-<!-- ADMIN VIEW -->
 <div id="admin-view">
-  <div class="admin-header">
-    <div class="admin-title">&#9881; Admin — WM Tippspiel</div>
-  </div>
-
+  <div class="a-title">⚙ Admin — WM Tippspiel 2026</div>
   <div class="a-card">
     <div class="a-card-title">Mitarbeiter & Tipp hinzufügen</div>
     <div class="a-row">
       <input id="inp-name" type="text" placeholder="Name des Mitarbeiters">
       <select id="inp-team"></select>
-      <label class="btn" style="cursor:pointer">
-        📷 Foto
+      <label class="btn" style="cursor:pointer">📷 Foto
         <input type="file" id="inp-photo" accept="image/*" style="display:none" onchange="previewPhoto(this)">
       </label>
-      <img id="photo-prev" class="photo-preview">
+      <img id="photo-prev" class="photo-preview-img">
       <button class="btn primary" onclick="addEntry()">+ Hinzufügen</button>
     </div>
   </div>
-
   <div class="a-card">
     <div class="a-card-title">Teams ausscheiden lassen (klicken zum umschalten)</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px" id="team-toggles"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px" id="team-toggles"></div>
   </div>
-
   <div class="a-card">
     <div class="a-card-title">Weltmeister bekannt geben</div>
     <div class="a-row">
       <select id="winner-sel"></select>
-      <button class="btn gold" onclick="setWinner()">🏆 Bestätigen</button>
+      <button class="btn gold" onclick="setWinner()">🏆 Weltmeister bestätigen</button>
       <button class="btn danger" onclick="clearWinner()">Zurücksetzen</button>
     </div>
   </div>
-
   <div class="a-card">
     <div class="a-card-title">Alle Einträge (<span id="entry-count">0</span>)</div>
     <div class="entries-list" id="entries-list"></div>
@@ -506,21 +215,23 @@
 
 <script>
 const TEAMS=[
-  {f:'🇧🇷',n:'Brasilien'},{f:'🇫🇷',n:'Frankreich'},{f:'🇩🇪',n:'Deutschland'},
-  {f:'🇦🇷',n:'Argentinien'},{f:'🇪🇸',n:'Spanien'},{f:'🇵🇹',n:'Portugal'},
-  {f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',n:'England'},{f:'🇳🇱',n:'Niederlande'},{f:'🇧🇪',n:'Belgien'},
-  {f:'🇺🇸',n:'USA'},{f:'🇲🇽',n:'Mexiko'},{f:'🇯🇵',n:'Japan'},
-  {f:'🇰🇷',n:'Südkorea'},{f:'🇲🇦',n:'Marokko'},{f:'🇸🇳',n:'Senegal'},
-  {f:'🇦🇺',n:'Australien'},{f:'🇨🇦',n:'Kanada'},{f:'🇺🇾',n:'Uruguay'},
-  {f:'🇨🇴',n:'Kolumbien'},{f:'🇨🇭',n:'Schweiz'},{f:'🇷🇸',n:'Serbien'},
-  {f:'🇭🇷',n:'Kroatien'},{f:'🇵🇱',n:'Polen'},{f:'🇹🇷',n:'Türkei'},
-  {f:'🇬🇭',n:'Ghana'},{f:'🇮🇷',n:'Iran'},{f:'🇸🇦',n:'Saudi-Arabien'},
-  {f:'🇨🇱',n:'Chile'},{f:'🇵🇪',n:'Peru'},{f:'🇳🇬',n:'Nigeria'},
-  {f:'🇨🇿',n:'Tschechien'},{f:'🇪🇨',n:'Ecuador'}
+  {n:'Brasilien',   c:'br'},{n:'Frankreich',  c:'fr'},{n:'Deutschland', c:'de'},
+  {n:'Argentinien', c:'ar'},{n:'Spanien',     c:'es'},{n:'Portugal',    c:'pt'},
+  {n:'England',     c:'gb-eng'},{n:'Niederlande', c:'nl'},{n:'Belgien',     c:'be'},
+  {n:'USA',         c:'us'},{n:'Mexiko',      c:'mx'},{n:'Japan',       c:'jp'},
+  {n:'Südkorea',    c:'kr'},{n:'Marokko',     c:'ma'},{n:'Senegal',     c:'sn'},
+  {n:'Australien',  c:'au'},{n:'Kanada',      c:'ca'},{n:'Uruguay',     c:'uy'},
+  {n:'Kolumbien',   c:'co'},{n:'Schweiz',     c:'ch'},{n:'Serbien',     c:'rs'},
+  {n:'Kroatien',    c:'hr'},{n:'Polen',       c:'pl'},{n:'Türkei',      c:'tr'},
+  {n:'Ghana',       c:'gh'},{n:'Iran',        c:'ir'},{n:'Saudi-Arabien',c:'sa'},
+  {n:'Chile',       c:'cl'},{n:'Peru',        c:'pe'},{n:'Nigeria',     c:'ng'},
+  {n:'Tschechien',  c:'cz'},{n:'Ecuador',     c:'ec'}
 ];
 
-const AVBG=['#1a4a3a','#2a1f5e','#0d2d4a','#3d2200','#3d1030','#3d1500','#1a3a0a'];
-const AVFG=['#5DCAA5','#AFA9EC','#85B7EB','#FAC775','#ED93B1','#F0997B','#97C459'];
+function flagUrl(c,s='w320'){return`https://flagcdn.com/${s}/${c}.png`;}
+
+const AVBG=['#1a4a3a','#2a1f5e','#0d2d4a','#3d2200','#3d1030','#1a3a0a','#2d1a00'];
+const AVFG=['#5DCAA5','#AFA9EC','#85B7EB','#FAC775','#ED93B1','#97C459','#EF9F27'];
 
 const DEMO=[
   {name:'Anna Müller',team:'Brasilien',photo:null},
@@ -537,22 +248,22 @@ const DEMO=[
   {name:'David Schneider',team:'Frankreich',photo:null},
 ];
 
-let entries = JSON.parse(localStorage.getItem('ps_entries')||'null') || DEMO;
-let eliminated = JSON.parse(localStorage.getItem('ps_elim')||'[]');
-let winner = localStorage.getItem('ps_winner')||'';
-let filter = 'all';
-let adminMode = false;
-let pendingPhoto = null;
+let entries=JSON.parse(localStorage.getItem('ps2_entries')||'null')||DEMO;
+let eliminated=JSON.parse(localStorage.getItem('ps2_elim')||'[]');
+let winner=localStorage.getItem('ps2_winner')||'';
+let filter='all';
+let adminMode=false;
+let pendingPhoto=null;
 
 function save(){
   try{
-    localStorage.setItem('ps_entries', JSON.stringify(entries));
-    localStorage.setItem('ps_elim', JSON.stringify(eliminated));
-    localStorage.setItem('ps_winner', winner);
+    localStorage.setItem('ps2_entries',JSON.stringify(entries));
+    localStorage.setItem('ps2_elim',JSON.stringify(eliminated));
+    localStorage.setItem('ps2_winner',winner);
   }catch(e){}
 }
 
-function gt(n){return TEAMS.find(t=>t.n===n)||{f:'🏳️',n};}
+function gt(n){return TEAMS.find(t=>t.n===n)||{n,c:'xx'};}
 function isOut(t){return eliminated.includes(t);}
 function initials(n){return n.trim().split(/\s+/).map(p=>p[0]).join('').toUpperCase().slice(0,2);}
 function avStyle(n){const i=n.charCodeAt(0)%AVBG.length;return`background:${AVBG[i]};color:${AVFG[i]}`;}
@@ -560,40 +271,36 @@ function avStyle(n){const i=n.charCodeAt(0)%AVBG.length;return`background:${AVBG
 function renderSignage(){
   const grouped={};
   entries.forEach(e=>{if(!grouped[e.team])grouped[e.team]=[];grouped[e.team].push(e);});
-
   let teams=Object.keys(grouped);
-  if(filter==='active') teams=teams.filter(t=>!isOut(t));
-  if(filter==='out') teams=teams.filter(t=>isOut(t));
+  if(filter==='active')teams=teams.filter(t=>!isOut(t));
+  if(filter==='out')teams=teams.filter(t=>isOut(t));
   teams.sort((a,b)=>{
     if(a===winner)return-1;if(b===winner)return 1;
     if(isOut(a)&&!isOut(b))return 1;if(!isOut(a)&&isOut(b))return-1;
     return a.localeCompare(b);
   });
 
-  document.getElementById('tiles-grid').innerHTML = teams.map(team=>{
+  document.getElementById('tiles-grid').innerHTML=teams.map(team=>{
     const tm=gt(team);
     const out=isOut(team);
     const isW=team===winner&&winner;
     const emps=grouped[team]||[];
-    return `<div class="tile ${out?'out':''} ${isW?'winner-tile':''}">
-      <div class="tile-top ${isW?'winner-top':''}">
-        <span class="tile-flag">${tm.f}</span>
-        <div class="tile-teamname ${out?'struck':''} ${isW?'gold':''}">${tm.n}${isW?' 🏆':''}</div>
+    return`<div class="tile ${out?'out':''} ${isW?'winner-tile':''}">
+      <div class="tile-flag-wrap">
+        <img class="tile-flag-img" src="${flagUrl(tm.c)}" alt="${tm.n}" loading="lazy">
+        <div class="tile-flag-label ${out?'struck':''} ${isW?'gold':''}">${tm.n}</div>
+        ${isW?'<div class="winner-crown">🏆 Weltmeister</div>':''}
+        ${out?'<div class="out-stamp">AUSGESCHIEDEN</div>':''}
       </div>
       <div class="tile-employees">
-        ${emps.length ? emps.map(e=>{
-          const photoEl = e.photo
-            ? `<img class="emp-photo" src="${e.photo}" alt="${e.name}">`
-            : `<div class="emp-avatar" style="${avStyle(e.name)}">${initials(e.name)}</div>`;
-          return `<div class="emp-row">
-            ${photoEl}
-            <div>
-              <div class="emp-name ${out?'struck':''}">${e.name}</div>
-              ${isW?'<span class="emp-badge win">🏆 Gewinner</span>':''}
-              ${out&&!isW?'<span class="emp-badge out">ausgeschieden</span>':''}
-            </div>
-          </div>`;
-        }).join('') : `<div class="tile-empty">Kein Tipp</div>`}
+        ${emps.length?emps.map(e=>{
+          const ph=e.photo?`<img class="emp-photo" src="${e.photo}" alt="${e.name}">`:`<div class="emp-avatar" style="${avStyle(e.name)}">${initials(e.name)}</div>`;
+          return`<div class="emp-row">${ph}<div>
+            <div class="emp-name ${out?'struck':''}">${e.name}</div>
+            ${isW?'<span class="emp-badge win">🏆 Gewinner</span>':''}
+            ${out&&!isW?'<span class="emp-badge out">ausgeschieden</span>':''}
+          </div></div>`;
+        }).join(''):`<div class="tile-empty">Kein Tipp</div>`}
       </div>
     </div>`;
   }).join('');
@@ -602,48 +309,42 @@ function renderSignage(){
   const outC=entries.filter(e=>isOut(e.team)).length;
   const winC=entries.filter(e=>e.team===winner).length;
   document.getElementById('s-stats').innerHTML=`
-    <div class="signage-stat"><div class="signage-stat-val">${total}</div><div class="signage-stat-lbl">Tipps</div></div>
-    <div class="signage-stat"><div class="signage-stat-val">${total-outC}</div><div class="signage-stat-lbl">Im Rennen</div></div>
-    ${winner?`<div class="signage-stat" style="color:var(--gold)"><div class="signage-stat-val" style="color:var(--gold)">${winC}</div><div class="signage-stat-lbl">Gewinner</div></div>`:''}
-  `;
+    <div class="s-stat"><div class="s-stat-val">${total}</div><div class="s-stat-lbl">Tipps</div></div>
+    <div class="s-stat"><div class="s-stat-val">${total-outC}</div><div class="s-stat-lbl">Im Rennen</div></div>
+    ${winner?`<div class="s-stat"><div class="s-stat-val" style="color:var(--gold)">${winC}</div><div class="s-stat-lbl" style="color:var(--gold)">Gewinner</div></div>`:''}`;
 
-  if(winner){
-    const wt=gt(winner);
-    document.getElementById('s-meta').textContent=`🏆 Weltmeister: ${wt.f} ${wt.n}`;
-  }
-
-  const tipperList=entries.map(e=>{const tm=gt(e.team);return`<b>${e.name}</b> tippt auf ${tm.f} ${e.team}`;}).join('  ·  ');
-  document.getElementById('ticker').innerHTML=tipperList+'  ·  ';
+  document.getElementById('s-meta').textContent=winner?`🏆 Weltmeister: ${gt(winner).n}`:'Wer tippt den richtigen Weltmeister?';
+  document.getElementById('ticker').innerHTML=entries.map(e=>`<b>${e.name}</b> tippt auf ${e.team}`).join('  ·  ')+'  ·  ';
 }
 
 function renderAdmin(){
   const tipped=[...new Set(entries.map(e=>e.team))];
   document.getElementById('team-toggles').innerHTML=tipped.map(t=>{
-    const tm=gt(t);
-    const out=isOut(t);
-    return`<button class="team-toggle ${out?'out':''}" onclick="toggleElim('${t}')">${tm.f} ${t} ${out?'✗':'✓'}</button>`;
+    const tm=gt(t);const out=isOut(t);
+    return`<button class="team-toggle ${out?'out':''}" onclick="toggleElim('${t}')">
+      <img src="${flagUrl(tm.c,'w40')}" alt="${tm.n}">${tm.n} ${out?'✗':'✓'}
+    </button>`;
   }).join('');
-
-  const used=tipped;
   document.getElementById('winner-sel').innerHTML='<option value="">-- kein Gewinner --</option>'+
-    used.map(t=>{const tm=gt(t);return`<option value="${t}" ${t===winner?'selected':''}>${tm.f} ${t}</option>`;}).join('');
-
-  document.getElementById('inp-team').innerHTML=TEAMS.map(t=>`<option value="${t.n}">${t.f} ${t.n}</option>`).join('');
-
+    tipped.map(t=>`<option value="${t}" ${t===winner?'selected':''}>${t}</option>`).join('');
+  document.getElementById('inp-team').innerHTML=TEAMS.map(t=>`<option value="${t.n}">${t.n}</option>`).join('');
   document.getElementById('entry-count').textContent=entries.length;
   document.getElementById('entries-list').innerHTML=entries.map((e,i)=>{
     const tm=gt(e.team);
-    const photoEl=e.photo?`<img src="${e.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">`:
-      `<div class="entry-avatar-sm" style="${avStyle(e.name)}">${initials(e.name)}</div>`;
-    return`<div class="entry-row">${photoEl}<span>${e.name}</span><span style="color:#888;font-size:12px">${tm.f} ${e.team}</span>
-      <button class="del-btn" onclick="removeEntry(${i})">×</button></div>`;
+    const ph=e.photo?`<img src="${e.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0">`:`<div class="entry-avatar-sm" style="${avStyle(e.name)}">${initials(e.name)}</div>`;
+    return`<div class="entry-row">${ph}
+      <span style="font-weight:500">${e.name}</span>
+      <img src="${flagUrl(tm.c,'w40')}" style="width:26px;height:17px;object-fit:cover;border-radius:2px">
+      <span style="color:#888;font-size:12px">${tm.n}</span>
+      <button class="del-btn" onclick="removeEntry(${i})">×</button>
+    </div>`;
   }).join('');
 }
 
-function setFilter(f, btn){
+function setFilter(f,btn){
   filter=f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
   renderSignage();
 }
 
@@ -652,8 +353,8 @@ function toggleView(){
   document.getElementById('signage-view').style.display=adminMode?'none':'flex';
   document.getElementById('admin-view').style.display=adminMode?'block':'none';
   document.getElementById('toggle-btn').textContent=adminMode?'◀ Anzeigetafel':'⚙ Admin';
-  document.getElementById('toggle-btn').className='btn '+(adminMode?'admin-mode':'');
-  if(adminMode) renderAdmin();
+  document.getElementById('toggle-btn').className=adminMode?'admin-mode':'';
+  if(adminMode)renderAdmin();
 }
 
 function previewPhoto(inp){
@@ -689,13 +390,12 @@ function setWinner(){
 }
 
 function clearWinner(){
-  winner='';localStorage.removeItem('ps_winner');
+  winner='';localStorage.removeItem('ps2_winner');
   save();renderAdmin();renderSignage();
 }
 
 renderSignage();
-
-setInterval(renderSignage, 30000);
+setInterval(renderSignage,30000);
 </script>
 </body>
 </html>
