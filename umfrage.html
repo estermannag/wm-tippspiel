@@ -265,8 +265,8 @@
       </div>
     </div>
 
-    <a id="twint-btn" href="#" class="twint-btn">Mit TWINT bezahlen</a>
-    <p class="hint">Öffnet die TWINT-App direkt auf deinem Handy</p>
+    <a id="twint-btn" href="twint://" class="twint-btn">TWINT öffnen</a>
+    <p class="hint">Öffnet die TWINT-App — Nummer 079 676 04 91, Betrag CHF 10.00</p>
 
     <button class="back-btn" onclick="goBack()">← Zurück</button>
 
@@ -376,7 +376,7 @@ function showPayment(team, name) {
   const purpose = 'WM 2026 Tippspiel – ' + team + ' – ' + name;
   document.getElementById('pay-purpose').textContent = purpose;
 
-  const twintUrl = 'https://pay.twint.ch/pay?phone=0796760491&amount=10.00&message=' + encodeURIComponent(purpose);
+  const twintUrl = 'twint://';
   document.getElementById('twint-btn').href = twintUrl;
 }
 
