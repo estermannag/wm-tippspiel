@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WM 2026 – Live Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0d0f18;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #13151f;
+      border-bottom: 1px solid #1e2130;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    header h1 span { color: #4a6cf7; }
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #888;
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      background: #13151f;
+      border-bottom: 1px solid #1e2130;
+      padding: 0 24px;
+    }
+    .tab {
+      padding: 12px 20px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s;
+    }
+    .tab:hover { color: #aaa; }
+    .tab.active { color: #4a6cf7; border-bottom-color: #4a6cf7; }
+
+    .content { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      margin-top: 24px;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .match-card {
+      background: #13151f;
+      border: 1px solid #1e2130;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 8px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+    .match-card.live { border-color: #22c55e44; background: #13201a; }
+    .match-card.finished { opacity: 0.7; }
+
+    .team {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .team.right { flex-direction: row-reverse; }
+    .team img {
+      width: 28px;
+      height: 19px;
+      object-fit: cover;
+      border-radius: 3px;
+    }
+    .team-name { font-size: 15px; font-weight: 500; }
+
+    .score-box { text-align: center; min-width: 80px; }
+    .score {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .score.live { color: #22c55e; }
+    .match-status {
+      font-size: 11px;
+      color: #555;
+      margin-top: 2px;
+    }
+    .match-status.live { color: #22c55e; }
+    .match-status.scheduled { color: #4a6cf7; }
+
+    /* Groups */
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .group-card {
+      background: #13151f;
+      border: 1px solid #1e2130;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .group-header {
+      background: #1a1d2e;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a6cf7;
+      letter-spacing: 0.5px;
+    }
+    .group-table { width: 100%; border-collapse: collapse; }
+    .group-table th {
+      font-size: 11px;
+      color: #444;
+      text-align: right;
+      padding: 6px 10px;
+      font-weight: 500;
+    }
+    .group-table th:first-child { text-align: left; }
+    .group-table td {
+      font-size: 13px;
+      padding: 7px 10px;
+      text-align: right;
+      border-top: 1px solid #1a1d2e;
+      color: #ccc;
+    }
+    .group-table td:first-child { text-align: left; color: #e0e0e0; }
+    .group-table tr:nth-child(2) td, .group-table tr:nth-child(3) td {
+      /* top 2 qualify */
+    }
+    .qualify-line { border-top: 2px solid #4a6cf744 !important; }
+
+    .team-flag-small {
+      width: 20px; height: 14px;
+      object-fit: cover;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    /* Loading / Error */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #444;
+      font-size: 15px;
+    }
+    .error-box {
+      background: #1e1318;
+      border: 1px solid #3e2030;
+      border-radius: 12px;
+      padding: 20px 24px;
+      color: #e07070;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    /* Knockout */
+    .knockout-round {
+      margin-bottom: 32px;
+    }
+    .knockout-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a6cf7;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e2130;
+    }
+
+    #tab-today, #tab-all, #tab-groups { display: none; }
+
+    .refresh-info {
+      font-size: 12px;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ WM <span>2026</span></h1>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    <span id="last-update">Wird geladen...</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('today')">Heute</div>
+  <div class="tab" onclick="showTab('all')">Alle Spiele</div>
+  <div class="tab" onclick="showTab('groups')">Gruppen</div>
+</div>
+
+<div class="content">
+  <div id="tab-today"><div class="loading">Lade Spiele...</div></div>
+  <div id="tab-all"><div class="loading">Lade Spiele...</div></div>
+  <div id="tab-groups"><div class="loading">Lade Gruppen...</div></div>
+</div>
+
+<div class="refresh-info">Automatische Aktualisierung alle 60 Sekunden</div>
+
+<script>
+const API_KEY = 'ee5cf15dedb04cd2bfee7333b33df960';
+const BASE = 'https://api.football-data.org/v4';
+
+const FLAG_CODES = {
+  "Algeria":"dz","Argentina":"ar","Australia":"au","Austria":"at","Belgium":"be",
+  "Bosnia and Herzegovina":"ba","Brazil":"br","Canada":"ca","Côte d'Ivoire":"ci",
+  "DR Congo":"cd","Colombia":"co","Cape Verde":"cv","Croatia":"hr","Curaçao":"cw",
+  "Czech Republic":"cz","Ecuador":"ec","Egypt":"eg","England":"gb-eng","Spain":"es",
+  "France":"fr","Germany":"de","Ghana":"gh","Haiti":"ht","Iran":"ir","Iraq":"iq",
+  "Jordan":"jo","Japan":"jp","Korea Republic":"kr","Saudi Arabia":"sa","Morocco":"ma",
+  "Mexico":"mx","Netherlands":"nl","Norway":"no","New Zealand":"nz","Panama":"pa",
+  "Paraguay":"py","Portugal":"pt","Qatar":"qa","South Africa":"za","Scotland":"gb-sct",
+  "Senegal":"sn","Switzerland":"ch","Sweden":"se","Tunisia":"tn","Turkey":"tr",
+  "Uruguay":"uy","USA":"us","Uzbekistan":"uz","United States":"us"
+};
+
+function flagUrl(teamName) {
+  const code = FLAG_CODES[teamName];
+  return code ? `https://flagcdn.com/w40/${code}.png` : '';
+}
+
+function flagImg(teamName, cls='') {
+  const url = flagUrl(teamName);
+  return url ? `<img src="${url}" alt="${teamName}" class="${cls}" onerror="this.style.display='none'">` : '';
+}
+
+async function fetchApi(path) {
+  const res = await fetch(`${BASE}${path}`, {
+    headers: { 'X-Auth-Token': API_KEY }
+  });
+  if (!res.ok) throw new Error(`API Fehler: ${res.status}`);
+  return res.json();
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('de-CH', { weekday:'short', day:'2-digit', month:'2-digit' })
+       + ' ' + d.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
+}
+
+function statusLabel(match) {
+  const s = match.status;
+  if (s === 'LIVE' || s === 'IN_PLAY' || s === 'PAUSED') return { text: '🔴 LIVE ' + (match.minute||''), cls: 'live' };
+  if (s === 'FINISHED') return { text: 'Beendet', cls: 'finished' };
+  if (s === 'SCHEDULED' || s === 'TIMED') return { text: formatDate(match.utcDate), cls: 'scheduled' };
+  return { text: s, cls: '' };
+}
+
+function renderMatch(match) {
+  const home = match.homeTeam?.name || '?';
+  const away = match.awayTeam?.name || '?';
+  const hs = match.score?.fullTime?.home ?? match.score?.halfTime?.home;
+  const as = match.score?.fullTime?.away ?? match.score?.halfTime?.away;
+  const status = statusLabel(match);
+  const isLive = status.cls === 'live';
+  const isFinished = match.status === 'FINISHED';
+
+  const scoreHtml = (hs !== null && hs !== undefined)
+    ? `<div class="score ${isLive?'live':''}">${hs} – ${as}</div>`
+    : `<div class="score" style="font-size:15px;color:#333">vs</div>`;
+
+  return `
+    <div class="match-card ${isLive?'live':''} ${isFinished?'finished':''}">
+      <div class="team">
+        ${flagImg(home)}
+        <span class="team-name">${home}</span>
+      </div>
+      <div class="score-box">
+        ${scoreHtml}
+        <div class="match-status ${status.cls}">${status.text}</div>
+      </div>
+      <div class="team right">
+        ${flagImg(away)}
+        <span class="team-name">${away}</span>
+      </div>
+    </div>`;
+}
+
+function groupMatchesByDate(matches) {
+  const groups = {};
+  matches.forEach(m => {
+    const d = new Date(m.utcDate).toLocaleDateString('de-CH', { weekday:'long', day:'2-digit', month:'long' });
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(m);
+  });
+  return groups;
+}
+
+async function loadToday() {
+  const el = document.getElementById('tab-today');
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const data = await fetchApi(`/competitions/WC/matches?dateFrom=${today}&dateTo=${today}`);
+    const matches = data.matches || [];
+
+    if (matches.length === 0) {
+      // show next few days
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 3);
+      const tStr = tomorrow.toISOString().split('T')[0];
+      const data2 = await fetchApi(`/competitions/WC/matches?dateFrom=${today}&dateTo=${tStr}&status=SCHEDULED`);
+      const upcoming = (data2.matches || []).slice(0, 6);
+      if (upcoming.length === 0) {
+        el.innerHTML = '<div class="loading">Keine Spiele heute oder in Kürze.</div>';
+        return;
+      }
+      el.innerHTML = '<div class="section-title">Nächste Spiele</div>' + upcoming.map(renderMatch).join('');
+      return;
+    }
+
+    const live = matches.filter(m => ['LIVE','IN_PLAY','PAUSED'].includes(m.status));
+    const finished = matches.filter(m => m.status === 'FINISHED');
+    const scheduled = matches.filter(m => ['SCHEDULED','TIMED'].includes(m.status));
+
+    let html = '';
+    if (live.length) html += '<div class="section-title">🔴 Live</div>' + live.map(renderMatch).join('');
+    if (scheduled.length) html += '<div class="section-title">Heute noch</div>' + scheduled.map(renderMatch).join('');
+    if (finished.length) html += '<div class="section-title">Beendet</div>' + finished.map(renderMatch).join('');
+    el.innerHTML = html;
+
+  } catch(e) {
+    el.innerHTML = `<div class="error-box">⚠️ Fehler beim Laden: ${e.message}</div>`;
+  }
+}
+
+async function loadAll() {
+  const el = document.getElementById('tab-all');
+  try {
+    const data = await fetchApi('/competitions/WC/matches');
+    const matches = data.matches || [];
+    const byDate = groupMatchesByDate(matches);
+    let html = '';
+    Object.entries(byDate).forEach(([date, ms]) => {
+      html += `<div class="section-title">${date}</div>`;
+      html += ms.map(renderMatch).join('');
+    });
+    el.innerHTML = html || '<div class="loading">Keine Spiele gefunden.</div>';
+  } catch(e) {
+    el.innerHTML = `<div class="error-box">⚠️ Fehler beim Laden: ${e.message}</div>`;
+  }
+}
+
+async function loadGroups() {
+  const el = document.getElementById('tab-groups');
+  try {
+    const data = await fetchApi('/competitions/WC/standings');
+    const standings = data.standings || [];
+    const groups = standings.filter(s => s.type === 'TOTAL');
+
+    if (groups.length === 0) {
+      el.innerHTML = '<div class="loading">Gruppen noch nicht verfügbar (Turnier hat noch nicht begonnen).</div>';
+      return;
+    }
+
+    let html = '<div class="groups-grid">';
+    groups.forEach(group => {
+      html += `<div class="group-card">
+        <div class="group-header">${group.group || 'Gruppe'}</div>
+        <table class="group-table">
+          <thead><tr>
+            <th>Team</th><th>Sp</th><th>S</th><th>U</th><th>N</th><th>Tore</th><th>Pkt</th>
+          </tr></thead>
+          <tbody>`;
+      group.table.forEach((row, i) => {
+        const cls = i === 2 ? 'qualify-line' : '';
+        html += `<tr class="${cls}">
+          <td>${flagImg(row.team.name, 'team-flag-small')}${row.team.name}</td>
+          <td>${row.playedGames}</td>
+          <td>${row.won}</td>
+          <td>${row.draw}</td>
+          <td>${row.lost}</td>
+          <td>${row.goalsFor}:${row.goalsAgainst}</td>
+          <td><strong>${row.points}</strong></td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<div class="error-box">⚠️ Fehler beim Laden: ${e.message}</div>`;
+  }
+}
+
+let currentTab = 'today';
+
+function showTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['today','all','groups'][i] === tab);
+  });
+  document.getElementById('tab-today').style.display = tab === 'today' ? 'block' : 'none';
+  document.getElementById('tab-all').style.display = tab === 'all' ? 'block' : 'none';
+  document.getElementById('tab-groups').style.display = tab === 'groups' ? 'block' : 'none';
+}
+
+function updateTime() {
+  const now = new Date().toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
+  document.getElementById('last-update').textContent = `Aktualisiert: ${now}`;
+}
+
+async function loadAll3() {
+  updateTime();
+  await Promise.all([loadToday(), loadAll(), loadGroups()]);
+}
+
+// Init
+showTab('today');
+loadAll3();
+
+// Auto-refresh every 60s
+setInterval(() => {
+  if (currentTab === 'today') loadToday();
+  else if (currentTab === 'all') loadAll();
+  else loadGroups();
+  updateTime();
+}, 60000);
+</script>
+</body>
+</html>
