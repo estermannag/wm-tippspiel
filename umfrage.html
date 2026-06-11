@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WM 2026 Tippspiel – Umfrage</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 2rem 1rem 3rem;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .logo h1 {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .logo p {
+      font-size: 14px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 6px;
+      margin-top: 1.25rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      background: #1e2130;
+      border: 1px solid #2e3248;
+      border-radius: 10px;
+      font-size: 15px;
+      color: #f0f0f0;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: #4a6cf7;
+    }
+    input::placeholder { color: #555; }
+
+    .search-wrap {
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #555;
+      pointer-events: none;
+    }
+    .search-wrap input {
+      padding-left: 38px;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+      gap: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 8px;
+      padding-right: 2px;
+    }
+    .team-grid::-webkit-scrollbar { width: 4px; }
+    .team-grid::-webkit-scrollbar-track { background: transparent; }
+    .team-grid::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+    .team-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #1e2130;
+      border: 1px solid #2e3248;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #ddd;
+      text-align: left;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .team-btn:hover { background: #252840; border-color: #3e4268; }
+    .team-btn.selected {
+      border: 2px solid #4a6cf7;
+      background: #1a2050;
+      color: #fff;
+      font-weight: 500;
+    }
+    .team-btn img {
+      width: 22px;
+      height: 15px;
+      object-fit: cover;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .confirm-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 13px;
+      background: #4a6cf7;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .confirm-btn:hover { background: #3a5ce7; }
+    .confirm-btn:disabled { background: #2a3060; color: #555; cursor: not-allowed; }
+
+    /* Payment screen */
+    .payment-screen { display: none; }
+    .thanks-box {
+      text-align: center;
+      background: #1e2130;
+      border: 1px solid #2e3248;
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .thanks-box .team-flag {
+      width: 80px;
+      height: 53px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .thanks-box h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .thanks-box p {
+      font-size: 14px;
+      color: #888;
+    }
+    .amount-display {
+      font-size: 36px;
+      font-weight: 700;
+      color: #4a6cf7;
+      margin: 1rem 0 0.25rem;
+    }
+    .purpose-box {
+      background: #151720;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #666;
+      margin: 1rem 0;
+      text-align: left;
+    }
+    .purpose-box strong { color: #888; display: block; margin-bottom: 2px; }
+
+    .twint-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: #0080C9;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+    }
+    .twint-btn:active { background: #006aaa; }
+
+    .hint {
+      font-size: 12px;
+      color: #555;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .back-btn {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      border: 1px solid #2e3248;
+      border-radius: 10px;
+      color: #888;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .back-btn:hover { border-color: #3e4268; color: #aaa; }
+
+    .signage-link {
+      display: block;
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 13px;
+      color: #444;
+      text-decoration: none;
+    }
+    .signage-link:hover { color: #666; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- FORM -->
+  <div id="form-screen">
+    <div class="logo">
+      <h1>⚽ WM 2026 Tippspiel</h1>
+      <p>Gebr. Estermann AG</p>
+    </div>
+
+    <label for="name">Dein Name</label>
+    <input id="name" type="text" placeholder="z. B. Anna Müller" />
+
+    <label>Dein Tipp-Weltmeister</label>
+    <div class="search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="search" type="text" placeholder="Team suchen..." />
+    </div>
+
+    <div class="team-grid" id="team-grid"></div>
+
+    <button class="confirm-btn" id="confirm-btn" disabled>Team wählen & weiter</button>
+
+    <a class="signage-link" href="index.html">→ Zur Anzeigetafel</a>
+  </div>
+
+  <!-- PAYMENT -->
+  <div class="payment-screen" id="payment-screen">
+    <div class="thanks-box">
+      <img class="team-flag" id="pay-flag" src="" alt="" />
+      <h2 id="pay-title">Danke!</h2>
+      <p id="pay-sub"></p>
+      <div class="amount-display">CHF 10.00</div>
+      <p style="font-size:13px;color:#666;">Tippgeld</p>
+      <div class="purpose-box">
+        <strong>Verwendungszweck</strong>
+        <span id="pay-purpose"></span>
+      </div>
+    </div>
+
+    <a id="twint-btn" href="#" class="twint-btn">Mit TWINT bezahlen</a>
+    <p class="hint">Öffnet die TWINT-App direkt auf deinem Handy</p>
+
+    <button class="back-btn" onclick="goBack()">← Zurück</button>
+
+    <a class="signage-link" href="index.html">→ Zur Anzeigetafel</a>
+  </div>
+
+</div>
+
+<script>
+const teams = [
+  { name: "Algerien",               code: "dz" },
+  { name: "Argentinien",            code: "ar" },
+  { name: "Australien",             code: "au" },
+  { name: "Österreich",             code: "at" },
+  { name: "Belgien",                code: "be" },
+  { name: "Bosnien und Herzegowina",code: "ba" },
+  { name: "Brasilien",              code: "br" },
+  { name: "Kanada",                 code: "ca" },
+  { name: "Elfenbeinküste",         code: "ci" },
+  { name: "DR Kongo",               code: "cd" },
+  { name: "Kolumbien",              code: "co" },
+  { name: "Kap Verde",              code: "cv" },
+  { name: "Kroatien",               code: "hr" },
+  { name: "Curaçao",                code: "cw" },
+  { name: "Tschechien",             code: "cz" },
+  { name: "Ecuador",                code: "ec" },
+  { name: "Ägypten",                code: "eg" },
+  { name: "England",                code: "gb-eng" },
+  { name: "Spanien",                code: "es" },
+  { name: "Frankreich",             code: "fr" },
+  { name: "Deutschland",            code: "de" },
+  { name: "Ghana",                  code: "gh" },
+  { name: "Haiti",                  code: "ht" },
+  { name: "Iran",                   code: "ir" },
+  { name: "Irak",                   code: "iq" },
+  { name: "Jordanien",              code: "jo" },
+  { name: "Japan",                  code: "jp" },
+  { name: "Südkorea",               code: "kr" },
+  { name: "Saudi-Arabien",          code: "sa" },
+  { name: "Marokko",                code: "ma" },
+  { name: "Mexiko",                 code: "mx" },
+  { name: "Niederlande",            code: "nl" },
+  { name: "Norwegen",               code: "no" },
+  { name: "Neuseeland",             code: "nz" },
+  { name: "Panama",                 code: "pa" },
+  { name: "Paraguay",               code: "py" },
+  { name: "Portugal",               code: "pt" },
+  { name: "Katar",                  code: "qa" },
+  { name: "Südafrika",              code: "za" },
+  { name: "Schottland",             code: "gb-sct" },
+  { name: "Senegal",                code: "sn" },
+  { name: "Schweiz",                code: "ch" },
+  { name: "Schweden",               code: "se" },
+  { name: "Tunesien",               code: "tn" },
+  { name: "Türkei",                 code: "tr" },
+  { name: "Uruguay",                code: "uy" },
+  { name: "USA",                    code: "us" },
+  { name: "Usbekistan",             code: "uz" }
+];
+
+let selected = null;
+const grid = document.getElementById('team-grid');
+const searchInput = document.getElementById('search');
+const confirmBtn = document.getElementById('confirm-btn');
+const nameInput = document.getElementById('name');
+
+function flagUrl(code) {
+  return 'https://flagcdn.com/w40/' + code + '.png';
+}
+
+function renderTeams(filter) {
+  grid.innerHTML = '';
+  const f = (filter || '').toLowerCase();
+  teams.filter(t => t.name.toLowerCase().includes(f)).forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'team-btn' + (selected === t.name ? ' selected' : '');
+    btn.innerHTML = '<img src="' + flagUrl(t.code) + '" alt="' + t.name + '" /><span>' + t.name + '</span>';
+    btn.onclick = () => { selected = t.name; updateConfirm(); renderTeams(searchInput.value); };
+    grid.appendChild(btn);
+  });
+}
+
+function updateConfirm() {
+  const hasName = nameInput.value.trim().length > 0;
+  confirmBtn.disabled = !selected || !hasName;
+  confirmBtn.textContent = selected ? selected + ' – weiter zur Zahlung' : 'Team wählen & weiter';
+}
+
+searchInput.addEventListener('input', () => renderTeams(searchInput.value));
+nameInput.addEventListener('input', updateConfirm);
+
+confirmBtn.addEventListener('click', () => {
+  if (!selected) return;
+  showPayment(selected, nameInput.value.trim());
+});
+
+function showPayment(team, name) {
+  document.getElementById('form-screen').style.display = 'none';
+  document.getElementById('payment-screen').style.display = 'block';
+
+  const teamObj = teams.find(t => t.name === team);
+  document.getElementById('pay-flag').src = flagUrl(teamObj.code);
+  document.getElementById('pay-flag').alt = team;
+  document.getElementById('pay-title').textContent = 'Danke, ' + name + '!';
+  document.getElementById('pay-sub').textContent = 'Dein Tipp: ' + team + ' wird Weltmeister 🏆';
+
+  const purpose = 'WM 2026 Tippspiel – ' + team + ' – ' + name;
+  document.getElementById('pay-purpose').textContent = purpose;
+
+  const twintUrl = 'https://pay.twint.ch/pay?phone=0796760491&amount=10.00&message=' + encodeURIComponent(purpose);
+  document.getElementById('twint-btn').href = twintUrl;
+}
+
+function goBack() {
+  document.getElementById('payment-screen').style.display = 'none';
+  document.getElementById('form-screen').style.display = 'block';
+}
+
+renderTeams();
+</script>
+</body>
+</html>
