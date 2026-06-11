@@ -265,7 +265,8 @@ function flagImg(teamName, cls='') {
 }
 
 async function fetchApi(path) {
-  const res = await fetch(`${BASE}${path}`, {
+  const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(`${BASE}${path}`)}`;
+  const res = await fetch(proxyUrl, {
     headers: { 'X-Auth-Token': API_KEY }
   });
   if (!res.ok) throw new Error(`API Fehler: ${res.status}`);
